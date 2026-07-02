@@ -12,7 +12,7 @@ Steam 게임 리뷰 감성분석 + AI 요약 + RAG Q&A
 | DL 감성분류 | LSTM/GRU 직접학습 vs DistilBERT 파인튜닝 (비교) |
 | LLM 요약/답변 | Qwen2.5-Instruct (HF Inference API) |
 | RAG | Chroma/FAISS 리뷰 검색 |
-| UI/배포 | Gradio 2탭 → Hugging Face Spaces |
+| UI/배포 | Streamlit 2탭 → Hugging Face Spaces |
 
 ## 상태
 

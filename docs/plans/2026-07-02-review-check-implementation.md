@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Steam 게임 리뷰의 긍/부정을 직접 학습한 DL 모델로 분류하고, Qwen2.5-Instruct로 장단점을 요약하며, RAG로 리뷰 기반 Q&A를 제공하는 Gradio 웹앱을 HF Spaces에 배포한다.
+**Goal:** Steam 게임 리뷰의 긍/부정을 직접 학습한 DL 모델로 분류하고, Qwen2.5-Instruct로 장단점을 요약하며, RAG로 리뷰 기반 Q&A를 제공하는 Streamlit 웹앱을 HF Spaces에 배포한다.
 
-**Architecture:** 순수 함수 중심의 5개 컴포넌트(데이터 파이프라인 / DL 분류 / LLM 요약 / RAG / Gradio 앱)를 독립적으로 구현·테스트한다. DL 모델은 LSTM과 DistilBERT 두 가지를 같은 지표로 비교하고, 성능 좋은 쪽을 HF Model Hub에 올려 앱에서 로드한다. LLM·임베딩 호출부는 한 곳에 추상화해 로컬(Ollama)↔배포(HF Inference API) 전환을 쉽게 한다.
+**Architecture:** 순수 함수 중심의 5개 컴포넌트(데이터 파이프라인 / DL 분류 / LLM 요약 / RAG / Streamlit 앱)를 독립적으로 구현·테스트한다. DL 모델은 LSTM과 DistilBERT 두 가지를 같은 지표로 비교하고, 성능 좋은 쪽을 HF Model Hub에 올려 앱에서 로드한다. LLM·임베딩 호출부는 한 곳에 추상화해 로컬(Ollama)↔배포(HF Inference API) 전환을 쉽게 한다.
 
-**Tech Stack:** Python 3.10, PyTorch, HuggingFace Transformers/Datasets, scikit-learn, sentence-transformers, chromadb/faiss-cpu, Gradio 6, HF Inference API (Qwen2.5-Instruct), pytest.
+**Tech Stack:** Python 3.10, PyTorch, HuggingFace Transformers/Datasets, scikit-learn, sentence-transformers, chromadb/faiss-cpu, Streamlit, HF Inference API (Qwen2.5-Instruct), pytest.
 
 ## Global Constraints
 
@@ -25,7 +25,7 @@
 
 ```
 review-check/
-├── app.py                     # Gradio 2탭 앱 (오케스트레이션)
+├── app.py                     # Streamlit 2탭 앱 (오케스트레이션)
 ├── requirements.txt
 ├── .env.example
 ├── src/
@@ -79,7 +79,7 @@ scikit-learn>=1.7
 sentence-transformers>=5.6
 chromadb>=1.5
 faiss-cpu>=1.14
-gradio>=6.19
+streamlit>=1.40
 huggingface-hub>=0.27
 python-dotenv>=1.2
 pandas>=2.2
@@ -714,60 +714,65 @@ git commit -m "feat: LLM client and pros/cons summarization"
 
 ---
 
-## Task 9: Gradio 앱 — 탭1 (Phase 1 완성본)
+## Task 9: Streamlit 앱 — 탭1 (Phase 1 완성본)
 
 **Files:**
 - Create: `app.py`
 
 **Interfaces:**
 - Consumes: `src.models.infer.{SentimentClassifier,split_by_sentiment}`, `src.llm.summarize.summarize`
-- Produces: 실행 가능한 Gradio 앱 (탭1: 감성분석+요약)
+- Produces: 실행 가능한 Streamlit 앱 (탭1: 감성분석+요약)
+
+**주의:** Streamlit은 상호작용마다 스크립트 전체를 재실행하므로, 모델 로드는 `@st.cache_resource`로 한 번만 로드한다.
 
 - [ ] **Step 1: app.py 작성**
 
 ```python
 # app.py
-import gradio as gr
+import streamlit as st
 from dotenv import load_dotenv
 from src.config import MODEL_DIR
 from src.models.infer import SentimentClassifier, split_by_sentiment
 from src.llm.summarize import summarize
 
 load_dotenv()
-clf = SentimentClassifier(MODEL_DIR / "distilbert")
 
-def analyze(reviews_text):
-    reviews = [r.strip() for r in reviews_text.split("\n") if r.strip()]
-    if not reviews:
-        return "리뷰를 입력하세요.", ""
-    results = clf.predict(reviews)
-    pos, neg = split_by_sentiment(results)
-    dist = f"긍정 {len(pos)}건 / 부정 {len(neg)}건"
-    return dist, summarize(pos, neg)
+@st.cache_resource
+def get_classifier():
+    return SentimentClassifier(MODEL_DIR / "distilbert")
 
-with gr.Blocks(title="review-check") as demo:
-    gr.Markdown("# review-check — Steam 리뷰 감성분석 + AI 요약")
-    with gr.Tab("감성분석 + 요약"):
-        inp = gr.Textbox(lines=10, label="리뷰 (한 줄에 하나)")
-        btn = gr.Button("분석")
-        dist = gr.Textbox(label="감성 분포")
-        summary = gr.Markdown(label="AI 요약")
-        btn.click(analyze, inp, [dist, summary])
+st.set_page_config(page_title="review-check", layout="wide")
+st.title("review-check — Steam 리뷰 감성분석 + AI 요약")
 
-if __name__ == "__main__":
-    demo.launch()
+tab1, tab2 = st.tabs(["감성분석 + 요약", "리뷰 Q&A (RAG)"])
+
+with tab1:
+    reviews_text = st.text_area("리뷰 (한 줄에 하나)", height=250)
+    if st.button("분석", key="analyze"):
+        reviews = [r.strip() for r in reviews_text.split("\n") if r.strip()]
+        if not reviews:
+            st.warning("리뷰를 입력하세요.")
+        else:
+            clf = get_classifier()
+            results = clf.predict(reviews)
+            pos, neg = split_by_sentiment(results)
+            c1, c2 = st.columns(2)
+            c1.metric("긍정", f"{len(pos)}건")
+            c2.metric("부정", f"{len(neg)}건")
+            with st.spinner("AI 요약 생성 중..."):
+                st.markdown(summarize(pos, neg))
 ```
 
 - [ ] **Step 2: 로컬 실행 확인**
 
-Run: `/Users/gomuseo/Desktop/Python/.venv/bin/python app.py`
-Expected: `Running on local URL: http://127.0.0.1:7860` — 브라우저에서 리뷰 입력→분포+요약 확인 후 Ctrl+C
+Run: `/Users/gomuseo/Desktop/Python/.venv/bin/streamlit run app.py`
+Expected: `Local URL: http://localhost:8501` — 브라우저에서 리뷰 입력→분포+요약 확인 후 Ctrl+C
 
 - [ ] **Step 3: 커밋**
 
 ```bash
 git add app.py
-git commit -m "feat: Gradio app tab1 — sentiment analysis and summary"
+git commit -m "feat: Streamlit app tab1 — sentiment analysis and summary"
 ```
 
 ---
@@ -904,7 +909,7 @@ git commit -m "feat: RAG question answering over reviews"
 
 ---
 
-## Task 12: Gradio 앱 — 탭2 추가 (Phase 2)
+## Task 12: Streamlit 앱 — 탭2 채우기 (Phase 2)
 
 **Files:**
 - Modify: `app.py`
@@ -912,31 +917,34 @@ git commit -m "feat: RAG question answering over reviews"
 **Interfaces:**
 - Consumes: `src.rag.qa.answer`
 
-- [ ] **Step 1: app.py에 탭2 추가** (기존 `with gr.Tab("감성분석 + 요약"):` 블록 아래, `if __name__` 위에 삽입)
+- [ ] **Step 1: app.py의 `with tab2:` 블록 채우기** (Task 9에서 이미 `tab2`는 선언됨. 파일 맨 아래에 아래 블록 추가)
 
 ```python
-    with gr.Tab("리뷰 Q&A (RAG)"):
-        q = gr.Textbox(label="질문", placeholder="예: 이 게임 멀미 있어?")
-        qbtn = gr.Button("질문")
-        ans = gr.Markdown(label="답변")
-        srcs = gr.JSON(label="근거 리뷰")
-        def qa(question):
+with tab2:
+    question = st.text_input("질문", placeholder="예: 이 게임 멀미 있어?")
+    if st.button("질문", key="ask"):
+        if not question.strip():
+            st.warning("질문을 입력하세요.")
+        else:
             from src.rag.qa import answer
-            a, ctx = answer(question)
-            return a, ctx
-        qbtn.click(qa, q, [ans, srcs])
+            with st.spinner("리뷰 검색 및 답변 생성 중..."):
+                ans, contexts = answer(question)
+            st.markdown(ans)
+            with st.expander("근거 리뷰"):
+                for c in contexts:
+                    st.write(f"- {c}")
 ```
 
 - [ ] **Step 2: 실행 확인**
 
-Run: `/Users/gomuseo/Desktop/Python/.venv/bin/python app.py`
+Run: `/Users/gomuseo/Desktop/Python/.venv/bin/streamlit run app.py`
 Expected: 탭2에서 질문→답변+근거 리뷰 표시 확인 후 Ctrl+C
 
 - [ ] **Step 3: 커밋**
 
 ```bash
 git add app.py
-git commit -m "feat: Gradio app tab2 — RAG Q&A"
+git commit -m "feat: Streamlit app tab2 — RAG Q&A"
 ```
 
 ---
@@ -958,10 +966,10 @@ Run:
 ```
 Expected: Hub URL 출력. 이후 `app.py`의 `SentimentClassifier`가 이 Hub ID를 로드하도록 `MODEL_DIR/"distilbert"` → `"rhantj/review-check-distilbert"`로 교체.
 
-- [ ] **Step 2: HF Space 생성 (Gradio SDK)**
+- [ ] **Step 2: HF Space 생성 (Streamlit SDK)**
 
-Run: `/Users/gomuseo/Desktop/Python/.venv/bin/huggingface-cli repo create review-check --type space --space_sdk gradio`
-Expected: Space URL 출력
+Run: `/Users/gomuseo/Desktop/Python/.venv/bin/huggingface-cli repo create review-check --type space --space_sdk streamlit`
+Expected: Space URL 출력. Streamlit SDK Space는 기본 진입점이 `app.py`이므로 별도 설정 불필요 (다른 파일명이면 README YAML에 `app_file: app.py` 지정).
 
 - [ ] **Step 3: Space에 HF_TOKEN 시크릿 등록**
 
@@ -991,6 +999,6 @@ git push origin master
 
 ## Self-Review 결과
 
-- **Spec coverage**: 데이터(Task 2-3), DL 2종 비교(Task 4-6), 통합추론(7), LLM 요약(8), Gradio 탭1(9), RAG(10-11), 탭2(12), 배포(13) — 스펙 전 항목 매핑됨.
+- **Spec coverage**: 데이터(Task 2-3), DL 2종 비교(Task 4-6), 통합추론(7), LLM 요약(8), Streamlit 탭1(9), RAG(10-11), 탭2(12), 배포(13) — 스펙 전 항목 매핑됨.
 - **Placeholder**: Task 3 Step 2에서 데이터셋 ID를 런타임 확인 후 확정하도록 명시(플레이스홀더 아님, 검증 절차).
 - **Type 일관성**: `predict()` 반환 dict 키(`text/label/label_name/score`), `split_by_sentiment`/`summarize`/`answer` 시그니처가 Task 간 일치.

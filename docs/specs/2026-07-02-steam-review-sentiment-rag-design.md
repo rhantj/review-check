@@ -26,7 +26,7 @@
         ↓
 [4. RAG Q&A] (Phase 2)  전체 리뷰 임베딩 → Chroma/FAISS → 질문 검색 + 근거 답변
         ↓
-[5. Gradio 앱]  탭1: 감성분석+요약 / 탭2: 리뷰 Q&A  → HF Spaces 배포
+[5. Streamlit 앱]  탭1: 감성분석+요약 / 탭2: 리뷰 Q&A  → HF Spaces 배포
 ```
 
 ### 컴포넌트 경계 (각각 독립·테스트 가능)
@@ -37,7 +37,7 @@
 | 2 | DL 감성분류 | 긍/부정 분류 | 리뷰 텍스트 | label + score | torch/transformers |
 | 3 | LLM 요약 | 장단점 요약 | 분류된 리뷰 묶음 | 요약 텍스트 | HF Inference API |
 | 4 | RAG Q&A | 검색+답변 | 질문 | 근거+답변 | 임베딩+벡터DB+LLM |
-| 5 | Gradio 앱 | UI/오케스트레이션 | 사용자 입력 | 화면 | gradio |
+| 5 | Streamlit 앱 | UI/오케스트레이션 | 사용자 입력 | 화면 | streamlit |
 
 ## 4. 모델 결정
 
@@ -60,12 +60,12 @@
 
 ## 6. 구현 순서 (리스크 헤지)
 
-- **Phase 1 (발표 안전판)**: 데이터 → 두 모델 학습·비교 → 요약 → Gradio 탭1 → Spaces 배포. **여기까지가 발표 최소 완성본.**
+- **Phase 1 (발표 안전판)**: 데이터 → 두 모델 학습·비교 → 요약 → Streamlit 탭1 → Spaces 배포. **여기까지가 발표 최소 완성본.**
 - **Phase 2 (임팩트)**: 리뷰 임베딩 → 벡터DB → Q&A 탭2 추가. 시간 부족 시 이 탭만 제외 가능.
 
 ## 7. 스코프
 
-- **In**: 데이터 준비, 모델 2종 비교, HF Model Hub 업로드, LLM 요약, RAG Q&A, Gradio 2탭, HF Spaces 배포
+- **In**: 데이터 준비, 모델 2종 비교, HF Model Hub 업로드, LLM 요약, RAG Q&A, Streamlit 2탭, HF Spaces 배포
 - **Out (YAGNI)**: 실시간 Steam 크롤링, 다국어 UI, 사용자 인증, 관계형 DB
 
 ## 8. 테스트/검증
