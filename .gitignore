@@ -16,7 +16,7 @@ data/raw/
 *.pkl
 *.pt
 *.bin
-models/
+/models/
 chroma_store/
 faiss_index/
 
