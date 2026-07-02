@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Secrets
+.env
+*.key
+
+# Data & models (too large / regenerable)
+data/raw/
+*.csv
+*.tsv
+*.pkl
+*.pt
+*.bin
+models/
+chroma_store/
+faiss_index/
+
+# OS
+.DS_Store
