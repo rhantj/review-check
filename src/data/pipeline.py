@@ -1,7 +1,24 @@
+import re
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-def clean_reviews(df: pd.DataFrame, text_col: str, label_col: str) -> pd.DataFrame:
+_BBCODE = re.compile(r"\[/?[a-zA-Z0-9*=]+\]")
+_URL = re.compile(r"https?://\S+|www\.\S+")
+_REPEAT = re.compile(r"(.)\1{2,}")
+_PUNCT = re.compile(r"([!?.,])")
+_WS = re.compile(r"\s+")
+
+def normalize_text(text: str) -> str:
+    """Steam 리뷰 노이즈 제거: BBCode, URL, 3+ 반복문자 축약, 구두점 분리."""
+    t = _BBCODE.sub(" ", text)
+    t = _URL.sub(" ", t)
+    t = _REPEAT.sub(r"\1\1", t)
+    t = _PUNCT.sub(r" \1 ", t)
+    return _WS.sub(" ", t).strip()
+
+def clean_reviews(df: pd.DataFrame, text_col: str, label_col: str,
+                  normalize: bool = False, min_words: int = 0) -> pd.DataFrame:
     out = df[[text_col, label_col]].copy()
     out.columns = ["text", "label"]
     out = out.dropna(subset=["text", "label"])
@@ -9,6 +26,11 @@ def clean_reviews(df: pd.DataFrame, text_col: str, label_col: str) -> pd.DataFra
     out = out[out["text"].str.len() > 0]
     # Steam review_score: 1=추천, -1=비추천 → 1/0
     out["label"] = (out["label"].astype(int) > 0).astype(int)
+    if normalize:
+        out["text"] = out["text"].map(normalize_text)
+        out = out[out["text"].str.len() > 0]
+    if min_words:
+        out = out[out["text"].str.split().str.len() >= min_words]
     out = out.drop_duplicates().reset_index(drop=True)
     return out
 

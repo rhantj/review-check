@@ -19,11 +19,13 @@ Steam 게임 리뷰 감성분석 + AI 요약 + RAG Q&A
 1. 의존성 설치: `pip install -r requirements.txt`
 2. `.env.example`을 `.env`로 복사하고 `HF_TOKEN` 설정
 3. 노트북을 순서대로 실행해 데이터·모델·인덱스 생성:
-   - `notebooks/01_download_data.ipynb` — 데이터 다운로드·정제·분할 (`data/`)
-   - `notebooks/02_train_lstm.ipynb` — LSTM 베이스라인 학습 (`models/lstm/`)
-   - `notebooks/03_train_distilbert.ipynb` — DistilBERT 파인튜닝 (`models/distilbert/`)
-   - `notebooks/04_compare_models.ipynb` — 두 모델 지표 비교표
-   - `notebooks/05_build_index.ipynb` — RAG 벡터 인덱스 구축 (`chroma_store/`)
+   - `notebooks/01_download_data.ipynb` — 데이터 다운로드 + 원본 EDA (`data/raw_sample.csv`)
+   - `notebooks/02_preprocessing.ipynb` — 전처리 전후 비교 + 정제·분할 (`data/{train,val,test}.csv`)
+   - `notebooks/03_train_lstm.ipynb` — LSTM 베이스라인 학습 (`models/lstm/`)
+   - `notebooks/04_train_distilbert.ipynb` — DistilBERT 파인튜닝 (`models/distilbert/`)
+   - `notebooks/05_compare_models.ipynb` — 두 모델 지표 비교표
+   - `notebooks/06_build_index.ipynb` — RAG 벡터 인덱스 구축 (`chroma_store/`)
+   - `notebooks/07_model_analysis.ipynb` — 모델 해석 (ROC/PR, 오분류, saliency, attention)
 4. 앱 실행: `streamlit run app.py`
 
 ## 프로젝트 구조
