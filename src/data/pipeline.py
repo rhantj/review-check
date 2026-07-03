@@ -1,17 +1,23 @@
+import html
 import re
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+_EARLY_ACCESS = re.compile(r"^\s*early\s+access\s+review\s*", re.IGNORECASE)
 _BBCODE = re.compile(r"\[/?[a-zA-Z0-9*=]+\]")
 _URL = re.compile(r"https?://\S+|www\.\S+")
 _REPEAT = re.compile(r"(.)\1{2,}")
 _PUNCT = re.compile(r"([!?.,])")
 _WS = re.compile(r"\s+")
+_ALNUM = re.compile(r"[A-Za-z0-9]")
 
 def normalize_text(text: str) -> str:
-    """Steam 리뷰 노이즈 제거: BBCode, URL, 3+ 반복문자 축약, 구두점 분리."""
-    t = _BBCODE.sub(" ", text)
+    """Steam 리뷰 노이즈 제거: HTML 엔티티 복원, Early Access 보일러플레이트·BBCode·URL 제거,
+    3+ 반복문자 축약, 구두점 분리."""
+    t = html.unescape(text)
+    t = _EARLY_ACCESS.sub(" ", t)
+    t = _BBCODE.sub(" ", t)
     t = _URL.sub(" ", t)
     t = _REPEAT.sub(r"\1\1", t)
     t = _PUNCT.sub(r" \1 ", t)
@@ -28,7 +34,8 @@ def clean_reviews(df: pd.DataFrame, text_col: str, label_col: str,
     out["label"] = (out["label"].astype(int) > 0).astype(int)
     if normalize:
         out["text"] = out["text"].map(normalize_text)
-        out = out[out["text"].str.len() > 0]
+        # 영숫자가 하나도 없는 리뷰(이모지·기호만)는 감성 신호가 없어 제거
+        out = out[out["text"].str.contains(_ALNUM, regex=True)]
     if min_words:
         out = out[out["text"].str.split().str.len() >= min_words]
     out = out.drop_duplicates().reset_index(drop=True)

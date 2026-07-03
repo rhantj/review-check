@@ -19,6 +19,9 @@ data/raw/
 /models/
 chroma_store/
 faiss_index/
+output/*.png
+.claude
+.pytest_cache
 
 # OS
 .DS_Store
