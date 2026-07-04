@@ -32,7 +32,7 @@ streamlit run app.py                     # 앱 실행
 3. `03_train_lstm.ipynb` — LSTM 베이스라인 학습(early stopping) + TF-IDF+LogReg 고전 ML 베이스라인 → `models/lstm/`, `models/tfidf_logreg/metrics.json`
 4. `04_train_distilbert.ipynb` — `distilbert-base-uncased` 파인튜닝 → `models/distilbert/`(모델+토크나이저+`metrics.json`)
 5. `05_compare_models.ipynb` — 세 모델(TF-IDF+LogReg/LSTM/DistilBERT) `metrics.json`을 읽어 비교표 생성 → `models/comparison.md`
-6. `06_build_index.ipynb` — train 전체 임베딩(`all-MiniLM-L6-v2`) → `chroma_store/`에 색인 (재구축 시 컬렉션 재생성)
+6. `06_build_index.ipynb` — 혼합 샘플링 색인: train 전체 + 인기 상위 20개 게임 리뷰(원본에서 라벨당 200건씩 추가 정제) → `chroma_store/`에 `app_name`/`label` 메타데이터와 함께 색인 (재구축 시 컬렉션 재생성, git 100MB 제한 용량 체크 포함)
 7. `07_model_analysis.ipynb` — DistilBERT 대상 ROC/PR, 확신도 분포, 오분류 사례, gradient saliency, attention 히트맵 (04 완료 필요)
 
 `app.py`는 `models/distilbert/`(4번 산출물)와 `chroma_store/`(6번 산출물)에 의존한다.
