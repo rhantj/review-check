@@ -9,8 +9,9 @@ def build_qa_prompt(question, contexts):
         "근거가 없으면 모른다고 답하라.\n\n"
         f"[리뷰]\n{ctx}\n\n[질문] {question}\n[답변]")
 
-def answer(question):
+def answer(question, app_name=None):
     col = get_collection(VECTOR_DIR)
-    res = col.query(query_texts=[question], n_results=RAG_TOP_K)
+    res = col.query(query_texts=[question], n_results=RAG_TOP_K,
+                    where={"app_name": app_name} if app_name else None)
     contexts = res["documents"][0]
     return chat(build_qa_prompt(question, contexts)), contexts

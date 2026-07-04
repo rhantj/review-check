@@ -24,9 +24,11 @@ def normalize_text(text: str) -> str:
     return _WS.sub(" ", t).strip()
 
 def clean_reviews(df: pd.DataFrame, text_col: str, label_col: str,
-                  normalize: bool = False, min_words: int = 0) -> pd.DataFrame:
-    out = df[[text_col, label_col]].copy()
-    out.columns = ["text", "label"]
+                  normalize: bool = False, min_words: int = 0,
+                  extra_cols: list = None) -> pd.DataFrame:
+    extra = list(extra_cols or [])
+    out = df[[text_col, label_col] + extra].copy()
+    out.columns = ["text", "label"] + extra
     out = out.dropna(subset=["text", "label"])
     out["text"] = out["text"].astype(str).str.strip()
     out = out[out["text"].str.len() > 0]
@@ -38,7 +40,7 @@ def clean_reviews(df: pd.DataFrame, text_col: str, label_col: str,
         out = out[out["text"].str.contains(_ALNUM, regex=True)]
     if min_words:
         out = out[out["text"].str.split().str.len() >= min_words]
-    out = out.drop_duplicates().reset_index(drop=True)
+    out = out.drop_duplicates(subset=["text", "label"]).reset_index(drop=True)
     return out
 
 def split_data(df, seed=42):
