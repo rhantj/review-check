@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Steam 게임 리뷰 감성분석(LSTM vs DistilBERT 비교) + LLM(Qwen3-Instruct) 요약 + RAG Q&A를 제공하는 Streamlit 데모. 포트폴리오/발표용 프로젝트.
+Steam 게임 리뷰 감성분석(LSTM vs DistilBERT 비교) + LLM(Gemma-3-27B) 요약 + RAG Q&A를 제공하는 Streamlit 데모. 포트폴리오/발표용 프로젝트.
 
 ## Commands
 
 ```bash
 pip install -r requirements.txt          # 의존성 설치
-cp .env.example .env                     # HF_TOKEN 설정 필요
+echo 'HF_TOKEN=hf_...' > .env            # HF 토큰 설정 필요 (.env는 gitignore 대상)
 streamlit run app.py                     # 앱 실행
 ```
 

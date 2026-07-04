@@ -163,7 +163,7 @@
     <div class="doc-type">2026년 AI개발 수행내역서 — 초안</div>
     <h1>Steam 게임 리뷰<br><span class="accent">감성분석</span> 및 LLM 요약</h1>
     <p style="max-width:640px;margin-top:1.6rem;font-size:1.15rem;">
-      LSTM vs DistilBERT 비교 · Qwen3 장단점 요약 · RAG 기반 리뷰 Q&amp;A<br>Streamlit 웹 데모
+      LSTM vs DistilBERT 비교 · Gemma-3 장단점 요약 · RAG 기반 리뷰 Q&amp;A<br>Streamlit 웹 데모
     </p>
     <div class="meta-card">
       <div class="meta-row"><div class="k">과제명</div><div class="v">Steam 리뷰 감성분석 모델 개발 및 LLM 요약·질의응답 데모</div></div>
@@ -183,7 +183,7 @@
       <a class="toc-item" href="#ch2"><span class="num">02</span><span class="t">데이터 분석 및 전처리</span><span class="d">균형 샘플링 · 노이즈 진단 · 정제</span></a>
       <a class="toc-item" href="#ch3"><span class="num">03</span><span class="t">모델 학습 및 비교</span><span class="d">LSTM 베이스라인 vs DistilBERT</span></a>
       <a class="toc-item" href="#ch4"><span class="num">04</span><span class="t">모델 해석 및 평가</span><span class="d">ROC/PR · Saliency · Attention</span></a>
-      <a class="toc-item" href="#ch5"><span class="num">05</span><span class="t">LLM 요약 · RAG Q&amp;A</span><span class="d">Qwen3 · Chroma 벡터 검색</span></a>
+      <a class="toc-item" href="#ch5"><span class="num">05</span><span class="t">LLM 요약 · RAG Q&amp;A</span><span class="d">Gemma-3 · Chroma 벡터 검색</span></a>
       <a class="toc-item" href="#ch6"><span class="num">06</span><span class="t">결론 및 향후 계획</span><span class="d">성과 요약 · 한계 · 배포</span></a>
     </div>
     <div class="footer-label">REVIEW-CHECK</div>
@@ -472,7 +472,7 @@
       <span class="arch-arrow">→</span>
       <span class="arch-box">긍정/부정 그룹</span>
       <span class="arch-arrow">→</span>
-      <span class="arch-box z">Qwen3-30B-A3B-Instruct</span>
+      <span class="arch-box z">gemma-3-27b-it</span>
       <span class="arch-arrow">→</span>
       <span class="arch-box">총평 + 장단점 3개씩</span>
     </div>
@@ -492,7 +492,7 @@
         <figcaption><span class="tag">그림 11</span> · 리뷰 임베딩 PCA 2D (train 전체 5,686건) — 감성 라벨별 분포 (06_build_index)</figcaption>
       </figure>
       <div>
-        <p style="margin-bottom:0.8rem;"><strong>모델 선택</strong> · Qwen2.5-7B → <span class="hl">Qwen3-30B-A3B-Instruct-2507</span>로 전환. MoE 구조로 추론이 빠르고 non-thinking 전용이라 요약 출력에 사고 과정이 섞이지 않으며, 한국어 품질이 개선됐다. 추론은 HF 서버에서 수행되어 로컬 자원과 무관.</p>
+        <p style="margin-bottom:0.8rem;"><strong>모델 선택</strong> · HF Inference 라우터가 계정에 실제 제공하는 모델을 실호출로 검증해 <span class="hl">google/gemma-3-27b-it</span>(한국어 품질 확인) + 폴백 <span class="hl">Qwen2.5-7B-Instruct</span>로 확정. reasoning 계열(Qwen3.5 등)은 빈 응답 이슈로 제외. 추론은 HF 서버에서 수행되어 로컬 자원과 무관.</p>
         <p><strong>Streamlit 3탭 + 게임별 분석</strong> · 색인에 <span class="hl2">app_name·label 메타데이터</span>를 저장해, ① 게임 선택 → 해당 게임 리뷰 전체 분류+장단점 요약 (리뷰 20건 이상 92개 게임), ② 리뷰 직접 입력 분석, ③ 게임 필터 지원 RAG Q&amp;A를 제공. 게임 목록·리뷰를 Chroma에서 직접 얻어 배포 시 원본 데이터 불필요.</p>
       </div>
     </div>
@@ -518,7 +518,7 @@
       <div class="card accent-l">
         <h3>진행 중 · 예정</h3>
         <ul class="clean" style="margin-top:0.6rem;">
-          <li>Streamlit 앱 동작 확인 (Qwen3 실호출)</li>
+          <li>배포 앱 최종 확인 (Streamlit Cloud)</li>
           <li>HF Model Hub 업로드 + Spaces 배포</li>
         </ul>
       </div>

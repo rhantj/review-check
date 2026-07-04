@@ -2,7 +2,7 @@
 
 Steam 게임 리뷰 감성분석 + AI 요약 + RAG Q&A
 
-직접 학습한 딥러닝 감성분류 모델과 LLM(Qwen3-Instruct)을 결합해, 게임 리뷰의 긍/부정을 분류하고 장단점을 자연어로 요약하며 리뷰 기반 질의응답을 제공하는 웹 데모.
+직접 학습한 딥러닝 감성분류 모델과 LLM(Gemma-3-27B)을 결합해, 게임 리뷰의 긍/부정을 분류하고 장단점을 자연어로 요약하며 리뷰 기반 질의응답을 제공하는 웹 데모.
 
 ## 구성
 
@@ -10,14 +10,14 @@ Steam 게임 리뷰 감성분석 + AI 요약 + RAG Q&A
 |---|---|
 | 데이터 | Steam Reviews (HF `ksang/steamreviews`, 긍/부정 1:1 균형 1만 건 샘플) |
 | DL 감성분류 | LSTM 직접학습 vs DistilBERT 파인튜닝 (비교) |
-| LLM 요약/답변 | Qwen3-30B-A3B-Instruct-2507 (HF Inference API) |
+| LLM 요약/답변 | google/gemma-3-27b-it (HF Inference API, 폴백 Qwen2.5-7B) |
 | RAG | all-MiniLM-L6-v2 임베딩 + Chroma 리뷰 검색 |
-| UI/배포 | Streamlit 2탭 → Hugging Face Spaces |
+| UI/배포 | Streamlit 3탭 (게임 분석 / 직접 입력 / RAG Q&A) → Streamlit Cloud |
 
 ## 실행 절차
 
 1. 의존성 설치: `pip install -r requirements.txt`
-2. `.env.example`을 `.env`로 복사하고 `HF_TOKEN` 설정
+2. 프로젝트 루트에 `.env` 파일을 만들고 `HF_TOKEN=hf_...` 설정
 3. 노트북을 순서대로 실행해 데이터·모델·인덱스 생성:
    - `notebooks/01_download_data.ipynb` — 데이터 다운로드 + 원본 EDA (`data/raw_sample.csv`)
    - `notebooks/02_preprocessing.ipynb` — 전처리 전후 비교 + 정제·분할 (`data/{train,val,test}.csv`)
