@@ -8,7 +8,7 @@ Steam 게임 리뷰 감성분석 + AI 요약 + RAG Q&A
 
 | 컴포넌트 | 내용 |
 |---|---|
-| 데이터 | Steam Reviews (HF `ksang/steamreviews`, 긍/부정 1:1 균형 2만 건 샘플) |
+| 데이터 | Steam Reviews (HF `ksang/steamreviews`, 긍/부정 1:1 균형 1만 건 샘플) |
 | DL 감성분류 | LSTM 직접학습 vs DistilBERT 파인튜닝 (비교) |
 | LLM 요약/답변 | Qwen3-30B-A3B-Instruct-2507 (HF Inference API) |
 | RAG | all-MiniLM-L6-v2 임베딩 + Chroma 리뷰 검색 |
@@ -21,9 +21,9 @@ Steam 게임 리뷰 감성분석 + AI 요약 + RAG Q&A
 3. 노트북을 순서대로 실행해 데이터·모델·인덱스 생성:
    - `notebooks/01_download_data.ipynb` — 데이터 다운로드 + 원본 EDA (`data/raw_sample.csv`)
    - `notebooks/02_preprocessing.ipynb` — 전처리 전후 비교 + 정제·분할 (`data/{train,val,test}.csv`)
-   - `notebooks/03_train_lstm.ipynb` — LSTM 베이스라인 학습 (`models/lstm/`)
+   - `notebooks/03_train_lstm.ipynb` — LSTM + TF-IDF 베이스라인 학습 (`models/lstm/`, `models/tfidf_logreg/`)
    - `notebooks/04_train_distilbert.ipynb` — DistilBERT 파인튜닝 (`models/distilbert/`)
-   - `notebooks/05_compare_models.ipynb` — 두 모델 지표 비교표
+   - `notebooks/05_compare_models.ipynb` — 세 모델 지표 비교표
    - `notebooks/06_build_index.ipynb` — RAG 벡터 인덱스 구축 (`chroma_store/`)
    - `notebooks/07_model_analysis.ipynb` — 모델 해석 (ROC/PR, 오분류, saliency, attention)
 4. 앱 실행: `streamlit run app.py`

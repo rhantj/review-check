@@ -27,11 +27,11 @@ streamlit run app.py                     # 앱 실행
 
 노트북은 서로 파일시스템으로 의존하므로(다음 노트북이 이전 산출물을 읽음) **순서대로만** 실행해야 한다:
 
-1. `01_download_data.ipynb` — HF `ksang/steamreviews`에서 긍/부정 각 1만 건 균형 샘플링 → `data/raw_sample.csv` + 원본 EDA
+1. `01_download_data.ipynb` — HF `ksang/steamreviews`에서 긍/부정 각 5천 건 균형 샘플링 → `data/raw_sample.csv` + 원본 EDA
 2. `02_preprocessing.ipynb` — `src.data.pipeline` 정제(BBCode/URL 제거, 반복문자 축약, 구두점 분리, 최소 길이 필터) → 전후 비교 → `data/{train,val,test}.csv` (계층 분할 70/15/15)
-3. `03_train_lstm.ipynb` — LSTM 베이스라인 학습 → `models/lstm/{model.pt,vocab.json,metrics.json}`
+3. `03_train_lstm.ipynb` — LSTM 베이스라인 학습(early stopping) + TF-IDF+LogReg 고전 ML 베이스라인 → `models/lstm/`, `models/tfidf_logreg/metrics.json`
 4. `04_train_distilbert.ipynb` — `distilbert-base-uncased` 파인튜닝 → `models/distilbert/`(모델+토크나이저+`metrics.json`)
-5. `05_compare_models.ipynb` — 두 모델 `metrics.json`을 읽어 비교표 생성 → `models/comparison.md`
+5. `05_compare_models.ipynb` — 세 모델(TF-IDF+LogReg/LSTM/DistilBERT) `metrics.json`을 읽어 비교표 생성 → `models/comparison.md`
 6. `06_build_index.ipynb` — train 2,000건 샘플 임베딩(`all-MiniLM-L6-v2`) → `chroma_store/`에 색인
 7. `07_model_analysis.ipynb` — DistilBERT 대상 ROC/PR, 확신도 분포, 오분류 사례, gradient saliency, attention 히트맵 (04 완료 필요)
 
@@ -62,3 +62,5 @@ LLM 호출은 `src/llm/client.py` 한 곳으로 추상화되어 있어 로컬 Ol
 `docs/specs/`와 `docs/plans/`에 초기 설계 스펙과 구현 계획이 있다 — 아키텍처 배경(왜 LSTM vs DistilBERT를 비교하는지, Phase 1/2 스코프 등)이 필요하면 참고.
 
 표, 그래프 등의 산출물들은 반드시 output 폴더에 저장한다. 코드 수정 후 변경된 산출물들은 네이밍을 달리해서 저장한다.
+실험 및 변경사항이 있을 때마다 보고서 업데이트
+보고서에 들어갈 이미지는 가장 최신의 버전을 사용한다. 에를 들어 *_v1, *_v2가 있다면 *_v2 사용.
