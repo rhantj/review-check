@@ -72,17 +72,15 @@ with tab2:
 
 with tab3:
     games = get_game_counts()
-    game_filter = st.selectbox(
-        "게임 필터 (선택)", ["전체 게임"] + [name for name, _ in games])
+    game_filter = st.selectbox("게임 선택", [name for name, _ in games])
     question = st.text_input("질문", placeholder="예: is this game worth buying?")
     if st.button("질문", key="ask"):
         if not question.strip():
             st.warning("질문을 입력하세요.")
         else:
             from src.rag.qa import answer
-            app_name = None if game_filter == "전체 게임" else game_filter
             with st.spinner("리뷰 검색 및 답변 생성 중..."):
-                ans, contexts = answer(question, app_name=app_name)
+                ans, contexts = answer(question, app_name=game_filter)
             st.markdown(ans)
             with st.expander("근거 리뷰"):
                 for c in contexts:
