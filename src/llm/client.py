@@ -10,6 +10,7 @@ def chat(prompt: str) -> str:
         return r["message"]["content"]
     from huggingface_hub import InferenceClient
     client = InferenceClient(token=os.environ["HF_TOKEN"])
+    errors = []
     for model in (LLM_MODEL_ID, LLM_FALLBACK_ID):
         try:
             r = client.chat_completion(
@@ -17,6 +18,6 @@ def chat(prompt: str) -> str:
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=512)
             return r.choices[0].message.content
-        except Exception:
-            continue
-    raise RuntimeError("모든 LLM 모델 호출 실패")
+        except Exception as e:
+            errors.append(f"{model}: {type(e).__name__} {e}")
+    raise RuntimeError("모든 LLM 모델 호출 실패:\n" + "\n".join(errors))
