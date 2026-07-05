@@ -180,10 +180,10 @@
     <h2>목차</h2>
     <div class="toc-list">
       <a class="toc-item" href="#ch1"><span class="num">01</span><span class="t">프로젝트 개요</span><span class="d">추진배경 · 목적 · 파이프라인</span></a>
-      <a class="toc-item" href="#ch2"><span class="num">02</span><span class="t">데이터 분석 및 전처리</span><span class="d">균형 샘플링 · 노이즈 진단 · 정제</span></a>
-      <a class="toc-item" href="#ch3"><span class="num">03</span><span class="t">모델 학습 및 비교</span><span class="d">LSTM 베이스라인 vs DistilBERT</span></a>
-      <a class="toc-item" href="#ch4"><span class="num">04</span><span class="t">LLM 요약 · RAG Q&amp;A</span><span class="d">Qwen2.5 · Chroma 벡터 검색</span></a>
-      <a class="toc-item" href="#ch5"><span class="num">05</span><span class="t">결론 및 향후 계획</span><span class="d">성과 요약 · 한계 · 배포</span></a>
+      <a class="toc-item" href="#ch2"><span class="num">02</span><span class="t">데이터 분석 및 전처리</span><span class="d">원본 · 샘플링 · 정제 · 판별 토큰</span></a>
+      <a class="toc-item" href="#ch3"><span class="num">03</span><span class="t">모델 학습 및 비교</span><span class="d">설계 · 학습 전략 · 결과 · DistilBERT 채택</span></a>
+      <a class="toc-item" href="#ch4"><span class="num">04</span><span class="t">LLM 요약 · RAG Q&amp;A</span><span class="d">RAG 색인·질의응답 · LLM 생성</span></a>
+      <a class="toc-item" href="#ch5"><span class="num">05</span><span class="t">결론 및 향후 계획</span><span class="d">성과 요약 · 한계와 개선 방향</span></a>
     </div>
     <div class="footer-label">REVIEW-CHECK</div>
     <div class="pageno">02</div>
@@ -483,7 +483,7 @@
   
 
 <!-- RAG ① 색인 -->
-  <section class="slide">
+  <section class="slide" id="ch4">
     <div class="kicker">04 · LLM 요약 · RAG Q&amp;A</div>
     <h2>RAG ① — 리뷰를 벡터로 저장해 둔다 (색인)</h2>
     <p style="margin-bottom:1.2rem;">LLM에게 그냥 물으면 학습 데이터에 없는 게임 정보를 <strong>지어낼(환각)</strong> 수 있다.
@@ -546,7 +546,7 @@
   </section>
 
   <!-- 12. LLM -->
-  <section class="slide" id="ch4">
+  <section class="slide">
     <div class="kicker">04 · LLM 요약 · RAG Q&amp;A</div>
     <h2>LLM — 받은 근거를 문장으로 바꿔주는 역할</h2>
     <p style="margin-bottom:1.2rem;">LLM(<span class="hl">Qwen2.5-7B-Instruct</span>)은 스스로 게임을 평가하지 않는다.
