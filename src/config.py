@@ -1,7 +1,7 @@
 from pathlib import Path
 
 RANDOM_SEED = 42
-MAX_LEN = 256
+MAX_LEN = 128  # 추론 토큰 상한 — 학습(TRAIN_MAX_LEN=128)과 일치, 초과분은 낭비
 
 HUB_MODEL_ID = "rhantj/review-check-distilbert"  # 로컬 models/distilbert 부재 시 폴백
 LLM_MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"

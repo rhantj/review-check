@@ -30,11 +30,16 @@ def get_game_counts():
                      if m and m.get("app_name") and m["app_name"] != "(unknown)")
     return [(name, n) for name, n in counts.most_common() if n >= MIN_GAME_REVIEWS]
 
-def analyze_and_summarize(reviews):
+@st.cache_data(show_spinner="리뷰 분류 중...")
+def classify_reviews(reviews: tuple):
+    """같은 리뷰 묶음(같은 게임)은 분류 결과를 캐시 — 재분석 시 즉시 반환."""
     from src.models.infer import split_by_sentiment
+    results = get_classifier().predict(list(reviews))
+    return split_by_sentiment(results)
+
+def analyze_and_summarize(reviews):
     from src.llm.summarize import summarize
-    results = get_classifier().predict(reviews)
-    pos, neg = split_by_sentiment(results)
+    pos, neg = classify_reviews(tuple(reviews))
     c1, c2 = st.columns(2)
     c1.metric("긍정", f"{len(pos)}건")
     c2.metric("부정", f"{len(neg)}건")
