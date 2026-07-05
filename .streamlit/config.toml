@@ -1,0 +1,4 @@
+[server]
+# 배포 환경에서는 코드 핫리로드가 불필요하고,
+# 파일 감시자가 transformers 내부 모듈을 스캔하며 경고를 쏟아내므로 비활성화
+fileWatcherType = "none"
