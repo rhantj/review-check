@@ -16,8 +16,10 @@ def get_classifier():
 
 @st.cache_resource
 def get_collection():
-    from src.rag.index import get_collection
-    return get_collection(VECTOR_DIR)
+    """메타데이터·문서 조회 전용 — 임베딩 모델 없이 Chroma만 연다.
+    (임베딩 모델은 Q&A에서 실제 검색할 때만 로드해 배포 메모리를 아낀다)"""
+    import chromadb
+    return chromadb.PersistentClient(path=str(VECTOR_DIR)).get_collection("reviews")
 
 @st.cache_data
 def get_game_counts():
