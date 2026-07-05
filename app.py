@@ -44,6 +44,39 @@ def analyze_and_summarize(reviews):
 
 st.set_page_config(page_title="review-check", layout="wide")
 
+# 회색 베이스 + 옅은 파란색 포인트 (기본 팔레트는 .streamlit/config.toml)
+st.markdown("""
+<style>
+/* 페이지 제목 아래 포인트 라인 */
+h1 { border-bottom: 3px solid #6C9BD1; padding-bottom: 0.35rem; }
+
+/* 긍정/부정 지표를 카드로 */
+[data-testid="stMetric"] {
+    background: #FFFFFF;
+    border: 1px solid #D8DCE2;
+    border-left: 4px solid #6C9BD1;
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+}
+
+/* 버튼: 파란 포인트, 호버 시 살짝 진하게 */
+.stButton > button, .stFormSubmitButton > button {
+    background: #6C9BD1; color: white; border: none; border-radius: 8px;
+}
+.stButton > button:hover, .stFormSubmitButton > button:hover {
+    background: #5A89C4; color: white;
+}
+
+/* 사이드바 구분감 */
+[data-testid="stSidebar"] { border-right: 1px solid #D8DCE2; }
+
+/* 펼침 목록(근거 리뷰 등) 테두리 정돈 */
+[data-testid="stExpander"] {
+    border: 1px solid #D8DCE2; border-radius: 10px; background: #FFFFFF;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # 왼쪽 사이드바 대시보드 메뉴
 with st.sidebar:
     st.title("Review Check")

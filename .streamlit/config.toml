@@ -2,3 +2,11 @@
 # 배포 환경에서는 코드 핫리로드가 불필요하고,
 # 파일 감시자가 transformers 내부 모듈을 스캔하며 경고를 쏟아내므로 비활성화
 fileWatcherType = "none"
+
+[theme]
+# 회색 베이스 + 옅은 파란색 포인트
+base = "light"
+primaryColor = "#6C9BD1"            # 포인트: 옅은 파랑 (버튼·라디오·포커스)
+backgroundColor = "#F4F5F7"         # 본문: 밝은 회색
+secondaryBackgroundColor = "#E8EAEE" # 사이드바·입력창: 한 톤 진한 회색
+textColor = "#3B4048"               # 본문 글자: 짙은 회색
