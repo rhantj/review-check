@@ -111,7 +111,7 @@ with st.sidebar:
     st.markdown('<div class="brand">REVIEW CHECK</div>'
                 '<div class="brand-sub">Steam 리뷰 감성분석 + AI 요약</div>',
                 unsafe_allow_html=True)
-    page = st.radio("메뉴", ["게임 분석", "리뷰 직접 입력", "리뷰 Q&A (RAG)"],
+    page = st.radio("메뉴", ["게임 분석", "리뷰 직접 입력", "리뷰 Q&A (RAG)", "모델 정보"],
                     label_visibility="collapsed")
     st.divider()
     st.caption("DistilBERT 분류 · Qwen2.5 요약 · Chroma RAG")
@@ -124,10 +124,14 @@ elif page == "리뷰 직접 입력":
     page_header("CUSTOM REVIEWS",
                 '리뷰를 붙여넣어 <span class="accent">분석</span>하기',
                 "어떤 리뷰든 한 줄에 하나씩 붙여넣으면 긍/부정을 판별하고 요약합니다.")
-else:
+elif page == "리뷰 Q&A (RAG)":
     page_header("REVIEW Q&A",
                 '리뷰에게 <span class="accent">질문</span>하세요',
                 "질문과 의미가 가장 비슷한 리뷰를 찾아 근거와 함께 답합니다.")
+else:
+    page_header("MODELS",
+                '사용한 <span class="accent">모델</span> 정리',
+                "이 데모를 구성하는 세 모델의 역할·파라미터·성능입니다.")
 
 if page == "게임 분석":
     games = get_game_counts()
@@ -174,3 +178,49 @@ elif page == "리뷰 Q&A (RAG)":
             with st.expander("근거 리뷰"):
                 for c in contexts:
                     st.write(f"- {c}")
+
+elif page == "모델 정보":
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("#### 감성 분류 — DistilBERT")
+        st.markdown("""
+| 항목 | 내용 |
+|---|---|
+| 모델 | `distilbert-base-uncased` 파인튜닝 |
+| 파라미터 수 | 약 66M |
+| 학습 데이터 | 균형 1만 건 (긍/부정 각 5천) |
+| 학습 설정 | AdamW · lr 5e-5 · 유효 배치 16 · max_len 128 · 3에폭 (val F1 최적 선택) |
+| 성능 (test) | **accuracy 0.856 · F1 0.855** |
+| 배포 | HF Hub `rhantj/review-check-distilbert` |
+""")
+        st.caption("역할: 리뷰를 긍정/부정으로 분류 — 요약의 재료를 가른다.")
+    with c2:
+        st.markdown("#### 임베딩 — MiniLM")
+        st.markdown("""
+| 항목 | 내용 |
+|---|---|
+| 모델 | `all-MiniLM-L6-v2` (사전학습 그대로) |
+| 파라미터 수 | 약 22M |
+| 출력 | 문장 → 384차원 벡터 |
+| 색인 | 리뷰 10,810건 → Chroma (`app_name`·`label` 메타데이터) |
+| 검색 | 코사인 유사도 top-5 + 게임 필터 |
+""")
+        st.caption("역할: 질문과 의미가 비슷한 리뷰를 찾는다 (Q&A 검색).")
+    with c3:
+        st.markdown("#### 생성 — Qwen2.5")
+        st.markdown("""
+| 항목 | 내용 |
+|---|---|
+| 모델 | `Qwen/Qwen2.5-7B-Instruct` (HF Inference API) |
+| 파라미터 수 | 약 7.6B |
+| 폴백 | `Llama-3.3-70B-Instruct` (1차 실패 시 자동 전환) |
+| 호출 | LangChain 체인 (`prompt \\| llm \\| parser`) · max 512토큰 |
+| 출력 | 총평 + 장점 3 + 단점 3 / 근거 기반 Q&A 답변 |
+""")
+        st.caption("역할: 받은 근거(분류 결과·검색 결과)를 한국어 문장으로 정리한다.")
+
+    st.divider()
+    st.markdown("""
+**연결 구조** — 세 모델은 순서대로 협업합니다:
+`리뷰 → DistilBERT(분류) → Qwen2.5(요약)` · `질문 → MiniLM(검색) → Qwen2.5(답변)`
+""")
