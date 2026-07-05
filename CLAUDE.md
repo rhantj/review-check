@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Steam 게임 리뷰 감성분석(LSTM vs DistilBERT 비교) + LLM(Gemma-3-27B) 요약 + RAG Q&A를 제공하는 Streamlit 데모. 포트폴리오/발표용 프로젝트.
+Steam 게임 리뷰 감성분석(LSTM vs DistilBERT 비교) + LLM(Qwen2.5-Instruct) 요약 + RAG Q&A를 제공하는 Streamlit 데모. 포트폴리오/발표용 프로젝트.
 
 ## Commands
 

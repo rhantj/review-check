@@ -2,7 +2,7 @@
 
 Steam 게임 리뷰 감성분석 + AI 요약 + RAG Q&A
 
-직접 학습한 딥러닝 감성분류 모델과 LLM(Gemma-3-27B)을 결합해, 게임 리뷰의 긍/부정을 분류하고 장단점을 자연어로 요약하며 리뷰 기반 질의응답을 제공하는 웹 데모.
+직접 학습한 딥러닝 감성분류 모델과 LLM(Qwen2.5-Instruct)을 결합해, 게임 리뷰의 긍/부정을 분류하고 장단점을 자연어로 요약하며 리뷰 기반 질의응답을 제공하는 웹 데모.
 
 ## 구성
 
@@ -10,7 +10,7 @@ Steam 게임 리뷰 감성분석 + AI 요약 + RAG Q&A
 |---|---|
 | 데이터 | Steam Reviews (HF `ksang/steamreviews`, 긍/부정 1:1 균형 1만 건 샘플) |
 | DL 감성분류 | LSTM 직접학습 vs DistilBERT 파인튜닝 (비교) |
-| LLM 요약/답변 | google/gemma-3-27b-it (HF Inference API, 폴백 Qwen2.5-7B) |
+| LLM 요약/답변 | Qwen/Qwen2.5-7B-Instruct (HF Inference API, 폴백 Llama-3.3-70B) |
 | RAG | LangChain (all-MiniLM-L6-v2 임베딩 + Chroma 검색 + LCEL 체인) |
 | UI/배포 | Streamlit 3탭 (게임 분석 / 직접 입력 / RAG Q&A) → Streamlit Cloud |
 
