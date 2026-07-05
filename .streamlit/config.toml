@@ -5,8 +5,8 @@ fileWatcherType = "none"
 
 [theme]
 # GRAYLUXE 스타일: 밝은 회색 베이스 + 부드러운 파랑 포인트
-base = "light"
+base = "dark"
 primaryColor = "#8FB9EA"             # 포인트: 소프트 블루
-backgroundColor = "#F2F4F7"          # 본문: 밝은 회색
-secondaryBackgroundColor = "#F2F4F7" # 사이드바: 본문과 동일 회색
-textColor = "#2F3338"                # 글자: 차콜 그레이
+backgroundColor = "#1E2126"          # 본문: 짙은 차콜 (라이트 반전)
+secondaryBackgroundColor = "#1E2126" # 사이드바: 본문과 동일 차콜
+textColor = "#E8EAEE"                # 글자: 밝은 회색

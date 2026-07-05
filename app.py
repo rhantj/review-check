@@ -55,7 +55,7 @@ st.markdown(f"""
 }}
 /* 페이지 타이틀: 얇은 큰 글씨, 포인트 단어만 파랑 */
 .page-title {{
-    font-size: 2.3rem; font-weight: 300; color: #2F3338;
+    font-size: 2.3rem; font-weight: 300; color: #E8EAEE;
     letter-spacing: -0.01em; line-height: 1.25; margin-bottom: 0.4rem;
 }}
 .page-title .accent {{ color: {ACCENT}; font-weight: 500; }}
@@ -63,7 +63,7 @@ st.markdown(f"""
 
 /* 긍정/부정 지표: 흰 카드, 얇은 테두리, 여백 넉넉히 */
 [data-testid="stMetric"] {{
-    background: #FFFFFF; border: 1px solid #E3E7EC;
+    background: #282C33; border: 1px solid #3A3F47;
     border-radius: 14px; padding: 1.1rem 1.3rem;
 }}
 [data-testid="stMetricValue"] {{ font-weight: 300; }}
@@ -81,21 +81,21 @@ st.markdown(f"""
 [data-testid="stSelectbox"] > div > div,
 [data-testid="stTextInput"] input,
 [data-testid="stTextArea"] textarea {{
-    background: #FFFFFF; border-radius: 12px;
+    background: #282C33; border-radius: 12px;
 }}
 
 /* 펼침 목록: 흰 카드 */
 [data-testid="stExpander"] {{
-    border: 1px solid #E3E7EC; border-radius: 14px; background: #FFFFFF;
+    border: 1px solid #3A3F47; border-radius: 14px; background: #282C33;
 }}
 
 /* 사이드바: 흰색 + 얇은 경계 */
 [data-testid="stSidebar"] {{
-    border-right: 1px solid #C9CDD4;
+    border-right: 1px solid #3A3F47;
 }}
 .brand {{
     font-size: 1.15rem; font-weight: 600; letter-spacing: 0.18em;
-    color: #2F3338; margin-bottom: 0.1rem;
+    color: #E8EAEE; margin-bottom: 0.1rem;
 }}
 .brand-sub {{ color: #8A9099; font-size: 0.8rem; margin-bottom: 1.2rem; }}
 </style>
@@ -231,18 +231,18 @@ elif page == "모델 정보":
 """)
 
 elif page == "RAG 구조":
-    ACCENT_BG = "#EAF2FC"
+    ACCENT_BG = "#253243"  # 어두운 파랑 틴트
 
     def flow(boxes):
         """박스 리스트를 화살표로 이은 가로 플로우 HTML."""
         items = []
         for label, desc, hl in boxes:
-            bg = ACCENT_BG if hl else "#FFFFFF"
-            bd = ACCENT if hl else "#E3E7EC"
+            bg = ACCENT_BG if hl else "#282C33"
+            bd = ACCENT if hl else "#3A3F47"
             items.append(
                 f'<div style="background:{bg};border:1px solid {bd};border-radius:12px;'
                 f'padding:0.8rem 1rem;text-align:center;flex:1;min-width:120px;">'
-                f'<div style="font-weight:600;font-size:0.9rem;color:#2F3338;">{label}</div>'
+                f'<div style="font-weight:600;font-size:0.9rem;color:#E8EAEE;">{label}</div>'
                 f'<div style="font-size:0.75rem;color:#8A9099;margin-top:0.2rem;">{desc}</div></div>')
         arrow = f'<div style="color:{ACCENT};font-size:1.2rem;align-self:center;">→</div>'
         return ('<div style="display:flex;gap:0.6rem;align-items:stretch;margin:0.6rem 0 1.6rem;">'
