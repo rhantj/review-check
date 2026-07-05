@@ -9,16 +9,19 @@ class SentimentClassifier:
         self.model = AutoModelForSequenceClassification.from_pretrained(str(model_dir))
         self.model.eval()
 
-    def predict(self, texts):
-        enc = self.tok(texts, truncation=True, max_length=MAX_LEN,
-                       padding=True, return_tensors="pt")
-        with torch.no_grad():
-            probs = self.model(**enc).logits.softmax(-1)
+    def predict(self, texts, batch_size=16):
+        # 수백 건을 한 번에 forward하면 저사양 배포 환경에서 OOM → 배치로 나눠 추론
         out = []
-        for text, p in zip(texts, probs):
-            label = int(p.argmax())
-            out.append({"text": text, "label": label,
-                        "label_name": LABELS[label], "score": float(p[label])})
+        for i in range(0, len(texts), batch_size):
+            chunk = list(texts[i:i + batch_size])
+            enc = self.tok(chunk, truncation=True, max_length=MAX_LEN,
+                           padding=True, return_tensors="pt")
+            with torch.no_grad():
+                probs = self.model(**enc).logits.softmax(-1)
+            for text, p in zip(chunk, probs):
+                label = int(p.argmax())
+                out.append({"text": text, "label": label,
+                            "label_name": LABELS[label], "score": float(p[label])})
         return out
 
 def split_by_sentiment(results):
