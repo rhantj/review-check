@@ -111,7 +111,8 @@ with st.sidebar:
     st.markdown('<div class="brand">REVIEW CHECK</div>'
                 '<div class="brand-sub">Steam 리뷰 감성분석 + AI 요약</div>',
                 unsafe_allow_html=True)
-    page = st.radio("메뉴", ["게임 분석", "리뷰 직접 입력", "리뷰 Q&A (RAG)", "모델 정보"],
+    page = st.radio("메뉴", ["게임 분석", "리뷰 직접 입력", "리뷰 Q&A (RAG)",
+                            "모델 정보", "RAG 구조"],
                     label_visibility="collapsed")
     st.divider()
     st.caption("DistilBERT 분류 · Qwen2.5 요약 · Chroma RAG")
@@ -128,10 +129,14 @@ elif page == "리뷰 Q&A (RAG)":
     page_header("REVIEW Q&A",
                 '리뷰에게 <span class="accent">질문</span>하세요',
                 "질문과 의미가 가장 비슷한 리뷰를 찾아 근거와 함께 답합니다.")
-else:
+elif page == "모델 정보":
     page_header("MODELS",
                 '사용한 <span class="accent">모델</span> 정리',
                 "이 데모를 구성하는 세 모델의 역할·파라미터·성능입니다.")
+else:
+    page_header("RAG PIPELINE",
+                'RAG <span class="accent">구조</span> 한눈에 보기',
+                "리뷰를 벡터로 저장해 두고, 질문이 오면 검색해 근거와 함께 답하는 구조입니다.")
 
 if page == "게임 분석":
     games = get_game_counts()
@@ -223,4 +228,56 @@ elif page == "모델 정보":
     st.markdown("""
 **연결 구조** — 세 모델은 순서대로 협업합니다:
 `리뷰 → DistilBERT(분류) → Qwen2.5(요약)` · `질문 → MiniLM(검색) → Qwen2.5(답변)`
+""")
+
+elif page == "RAG 구조":
+    ACCENT_BG = "#EAF2FC"
+
+    def flow(boxes):
+        """박스 리스트를 화살표로 이은 가로 플로우 HTML."""
+        items = []
+        for label, desc, hl in boxes:
+            bg = ACCENT_BG if hl else "#FFFFFF"
+            bd = ACCENT if hl else "#E3E7EC"
+            items.append(
+                f'<div style="background:{bg};border:1px solid {bd};border-radius:12px;'
+                f'padding:0.8rem 1rem;text-align:center;flex:1;min-width:120px;">'
+                f'<div style="font-weight:600;font-size:0.9rem;color:#2F3338;">{label}</div>'
+                f'<div style="font-size:0.75rem;color:#8A9099;margin-top:0.2rem;">{desc}</div></div>')
+        arrow = f'<div style="color:{ACCENT};font-size:1.2rem;align-self:center;">→</div>'
+        return ('<div style="display:flex;gap:0.6rem;align-items:stretch;margin:0.6rem 0 1.6rem;">'
+                + arrow.join(items) + '</div>')
+
+    st.markdown(f'<div class="kicker">STEP 1 · 색인 구축 — 한 번만 (노트북 06)</div>',
+                unsafe_allow_html=True)
+    st.markdown(flow([
+        ("리뷰 10,810건", "train 전체 + 인기 20개 게임", False),
+        ("임베딩 모델", "MiniLM · 문장→384차원 벡터", True),
+        ("Chroma 저장", "벡터 + 원문 + 게임명·라벨", True),
+    ]), unsafe_allow_html=True)
+
+    st.markdown(f'<div class="kicker">STEP 2 · 질의응답 — 질문할 때마다 (리뷰 Q&A 메뉴)</div>',
+                unsafe_allow_html=True)
+    st.markdown(flow([
+        ("질문 입력", '"is this game worth buying?"', False),
+        ("질문 임베딩", "같은 모델로 벡터 변환", True),
+        ("벡터 검색", "게임 필터 + 의미가 비슷한 리뷰 5개", True),
+        ("LLM 생성", "Qwen2.5 · 근거로만 답하라", True),
+        ("답변 + 근거", "근거 리뷰 원문 함께 표시", False),
+    ]), unsafe_allow_html=True)
+
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("##### 왜 이렇게 하나")
+        st.markdown("""
+- LLM에게 그냥 물으면 **지어낸 답(환각)** 이 나올 수 있음
+- 실제 리뷰를 검색해 근거로 건네면 **데이터에 있는 내용만** 답하게 됨
+- "근거가 없으면 모른다고 답하라"는 지시 + 근거 원문 노출로 검증 가능
+""")
+    with c2:
+        st.markdown("##### 검색이 키워드가 아닌 '의미'로 되는 이유")
+        st.markdown("""
+- 임베딩 모델이 의미가 비슷한 문장을 **가까운 벡터**로 만들어 둠
+- 질문도 같은 공간의 벡터로 바꿔 **가장 가까운 리뷰**를 찾음
+- 그래서 "buggy?"로 물어도 "crashes constantly" 리뷰가 검색됨
 """)
