@@ -1,8 +1,6 @@
 import streamlit as st
 from dotenv import load_dotenv
 from src.config import MODEL_DIR, VECTOR_DIR, HUB_MODEL_ID
-from src.models.infer import SentimentClassifier, split_by_sentiment
-from src.llm.summarize import summarize
 
 load_dotenv()
 
@@ -10,6 +8,8 @@ MIN_GAME_REVIEWS = 20  # 게임 분석 탭에 노출할 최소 리뷰 수
 
 @st.cache_resource
 def get_classifier():
+    # torch/transformers는 무거우므로 실제 분석 시점에만 import (기동 메모리 절약)
+    from src.models.infer import SentimentClassifier
     local = MODEL_DIR / "distilbert"
     # 배포 환경(모델 미포함 레포)에서는 HF Hub에서 다운로드
     return SentimentClassifier(local if local.exists() else HUB_MODEL_ID)
@@ -31,6 +31,8 @@ def get_game_counts():
     return [(name, n) for name, n in counts.most_common() if n >= MIN_GAME_REVIEWS]
 
 def analyze_and_summarize(reviews):
+    from src.models.infer import split_by_sentiment
+    from src.llm.summarize import summarize
     results = get_classifier().predict(reviews)
     pos, neg = split_by_sentiment(results)
     c1, c2 = st.columns(2)
