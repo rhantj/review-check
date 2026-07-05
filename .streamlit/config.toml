@@ -7,6 +7,6 @@ fileWatcherType = "none"
 # GRAYLUXE 스타일: 밝은 회색 베이스 + 부드러운 파랑 포인트
 base = "light"
 primaryColor = "#8FB9EA"             # 포인트: 소프트 블루
-backgroundColor = "#F2F4F7"          # 본문: 밝은 회색
-secondaryBackgroundColor = "#FFFFFF" # 사이드바·입력창: 흰색
+backgroundColor = "#DCDFE4"          # 본문: 회색 (기존 대비 ~10% 어둡게)
+secondaryBackgroundColor = "#DCDFE4" # 사이드바: 본문과 동일 회색
 textColor = "#2F3338"                # 글자: 차콜 그레이

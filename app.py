@@ -91,7 +91,7 @@ st.markdown(f"""
 
 /* 사이드바: 흰색 + 얇은 경계 */
 [data-testid="stSidebar"] {{
-    background: #FFFFFF; border-right: 1px solid #E3E7EC;
+    border-right: 1px solid #C9CDD4;
 }}
 .brand {{
     font-size: 1.15rem; font-weight: 600; letter-spacing: 0.18em;
