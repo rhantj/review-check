@@ -77,8 +77,11 @@ with tab2:
 with tab3:
     games = get_game_counts()
     game_filter = st.selectbox("게임 선택", [name for name, _ in games])
-    question = st.text_input("질문", placeholder="예: is this game worth buying?")
-    if st.button("질문", key="ask"):
+    # form으로 묶으면 입력창에서 Enter만 눌러도 제출된다
+    with st.form("qa_form"):
+        question = st.text_input("질문", placeholder="예: is this game worth buying?")
+        submitted = st.form_submit_button("질문")
+    if submitted:
         if not question.strip():
             st.warning("질문을 입력하세요.")
         else:
