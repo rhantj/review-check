@@ -4,9 +4,9 @@
 fileWatcherType = "none"
 
 [theme]
-# 회색 베이스 + 옅은 파란색 포인트
+# GRAYLUXE 스타일: 밝은 회색 베이스 + 부드러운 파랑 포인트
 base = "light"
-primaryColor = "#6C9BD1"            # 포인트: 옅은 파랑 (버튼·라디오·포커스)
-backgroundColor = "#F4F5F7"         # 본문: 밝은 회색
-secondaryBackgroundColor = "#E8EAEE" # 사이드바·입력창: 한 톤 진한 회색
-textColor = "#3B4048"               # 본문 글자: 짙은 회색
+primaryColor = "#8FB9EA"             # 포인트: 소프트 블루
+backgroundColor = "#F2F4F7"          # 본문: 밝은 회색
+secondaryBackgroundColor = "#FFFFFF" # 사이드바·입력창: 흰색
+textColor = "#2F3338"                # 글자: 차콜 그레이

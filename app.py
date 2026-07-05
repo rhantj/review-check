@@ -44,49 +44,90 @@ def analyze_and_summarize(reviews):
 
 st.set_page_config(page_title="review-check", layout="wide")
 
-# 회색 베이스 + 옅은 파란색 포인트 (기본 팔레트는 .streamlit/config.toml)
-st.markdown("""
+# GRAYLUXE 스타일: 밝은 회색 베이스 · 얇은 타이포 · 소프트 블루 포인트
+ACCENT = "#8FB9EA"
+st.markdown(f"""
 <style>
-/* 페이지 제목 아래 포인트 라인 */
-h1 { border-bottom: 3px solid #6C9BD1; padding-bottom: 0.35rem; }
+/* 섹션 킥커: 작은 대문자 파란 라벨 */
+.kicker {{
+    color: {ACCENT}; font-size: 0.78rem; font-weight: 600;
+    letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 0.2rem;
+}}
+/* 페이지 타이틀: 얇은 큰 글씨, 포인트 단어만 파랑 */
+.page-title {{
+    font-size: 2.3rem; font-weight: 300; color: #2F3338;
+    letter-spacing: -0.01em; line-height: 1.25; margin-bottom: 0.4rem;
+}}
+.page-title .accent {{ color: {ACCENT}; font-weight: 500; }}
+.page-sub {{ color: #8A9099; font-size: 0.95rem; margin-bottom: 1.6rem; }}
 
-/* 긍정/부정 지표를 카드로 */
-[data-testid="stMetric"] {
-    background: #FFFFFF;
-    border: 1px solid #D8DCE2;
-    border-left: 4px solid #6C9BD1;
-    border-radius: 10px;
-    padding: 0.9rem 1.1rem;
-}
+/* 긍정/부정 지표: 흰 카드, 얇은 테두리, 여백 넉넉히 */
+[data-testid="stMetric"] {{
+    background: #FFFFFF; border: 1px solid #E3E7EC;
+    border-radius: 14px; padding: 1.1rem 1.3rem;
+}}
+[data-testid="stMetricValue"] {{ font-weight: 300; }}
 
-/* 버튼: 파란 포인트, 호버 시 살짝 진하게 */
-.stButton > button, .stFormSubmitButton > button {
-    background: #6C9BD1; color: white; border: none; border-radius: 8px;
-}
-.stButton > button:hover, .stFormSubmitButton > button:hover {
-    background: #5A89C4; color: white;
-}
+/* 버튼: 알약형 소프트 블루 */
+.stButton > button, .stFormSubmitButton > button {{
+    background: {ACCENT}; color: white; border: none;
+    border-radius: 999px; padding: 0.45rem 1.6rem; font-weight: 500;
+}}
+.stButton > button:hover, .stFormSubmitButton > button:hover {{
+    background: #7AAAE0; color: white;
+}}
 
-/* 사이드바 구분감 */
-[data-testid="stSidebar"] { border-right: 1px solid #D8DCE2; }
+/* 입력·선택 상자: 흰 배경, 둥근 모서리 */
+[data-testid="stSelectbox"] > div > div,
+[data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea {{
+    background: #FFFFFF; border-radius: 12px;
+}}
 
-/* 펼침 목록(근거 리뷰 등) 테두리 정돈 */
-[data-testid="stExpander"] {
-    border: 1px solid #D8DCE2; border-radius: 10px; background: #FFFFFF;
-}
+/* 펼침 목록: 흰 카드 */
+[data-testid="stExpander"] {{
+    border: 1px solid #E3E7EC; border-radius: 14px; background: #FFFFFF;
+}}
+
+/* 사이드바: 흰색 + 얇은 경계 */
+[data-testid="stSidebar"] {{
+    background: #FFFFFF; border-right: 1px solid #E3E7EC;
+}}
+.brand {{
+    font-size: 1.15rem; font-weight: 600; letter-spacing: 0.18em;
+    color: #2F3338; margin-bottom: 0.1rem;
+}}
+.brand-sub {{ color: #8A9099; font-size: 0.8rem; margin-bottom: 1.2rem; }}
 </style>
 """, unsafe_allow_html=True)
 
+def page_header(kicker, title_html, sub):
+    st.markdown(f'<div class="kicker">{kicker}</div>'
+                f'<div class="page-title">{title_html}</div>'
+                f'<div class="page-sub">{sub}</div>', unsafe_allow_html=True)
+
 # 왼쪽 사이드바 대시보드 메뉴
 with st.sidebar:
-    st.title("Review Check")
-    st.caption("Steam 리뷰 감성분석 + AI 요약")
+    st.markdown('<div class="brand">REVIEW CHECK</div>'
+                '<div class="brand-sub">Steam 리뷰 감성분석 + AI 요약</div>',
+                unsafe_allow_html=True)
     page = st.radio("메뉴", ["게임 분석", "리뷰 직접 입력", "리뷰 Q&A (RAG)"],
                     label_visibility="collapsed")
     st.divider()
     st.caption("DistilBERT 분류 · Qwen2.5 요약 · Chroma RAG")
 
-st.title(page)
+if page == "게임 분석":
+    page_header("GAME ANALYSIS",
+                '게임의 <span class="accent">여론</span>을 한눈에',
+                "게임을 고르면 리뷰 전체를 분류하고 총평과 장단점을 요약합니다.")
+elif page == "리뷰 직접 입력":
+    page_header("CUSTOM REVIEWS",
+                '리뷰를 붙여넣어 <span class="accent">분석</span>하기',
+                "어떤 리뷰든 한 줄에 하나씩 붙여넣으면 긍/부정을 판별하고 요약합니다.")
+else:
+    page_header("REVIEW Q&A",
+                '리뷰에게 <span class="accent">질문</span>하세요',
+                "질문과 의미가 가장 비슷한 리뷰를 찾아 근거와 함께 답합니다.")
 
 if page == "게임 분석":
     games = get_game_counts()
