@@ -43,11 +43,19 @@ def analyze_and_summarize(reviews):
     return pos, neg
 
 st.set_page_config(page_title="review-check", layout="wide")
-st.title("review-check — Steam 리뷰 감성분석 + AI 요약")
 
-tab1, tab2, tab3 = st.tabs(["게임 분석", "리뷰 직접 입력", "리뷰 Q&A (RAG)"])
+# 왼쪽 사이드바 대시보드 메뉴
+with st.sidebar:
+    st.title("Review Check")
+    st.caption("Steam 리뷰 감성분석 + AI 요약")
+    page = st.radio("메뉴", ["게임 분석", "리뷰 직접 입력", "리뷰 Q&A (RAG)"],
+                    label_visibility="collapsed")
+    st.divider()
+    st.caption("DistilBERT 분류 · Qwen2.5 요약 · Chroma RAG")
 
-with tab1:
+st.title(page)
+
+if page == "게임 분석":
     games = get_game_counts()
     if not games:
         st.warning("색인에 게임 메타데이터가 없습니다. 06 노트북을 재실행하세요.")
@@ -65,7 +73,7 @@ with tab1:
                 for r in reviews[:50]:
                     st.write(f"- {r[:300]}")
 
-with tab2:
+elif page == "리뷰 직접 입력":
     reviews_text = st.text_area("리뷰 (한 줄에 하나)", height=250)
     if st.button("분석", key="analyze"):
         reviews = [r.strip() for r in reviews_text.split("\n") if r.strip()]
@@ -74,7 +82,7 @@ with tab2:
         else:
             analyze_and_summarize(reviews)
 
-with tab3:
+elif page == "리뷰 Q&A (RAG)":
     games = get_game_counts()
     game_filter = st.selectbox("게임 선택", [name for name, _ in games])
     # form으로 묶으면 입력창에서 Enter만 눌러도 제출된다
