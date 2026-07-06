@@ -151,8 +151,9 @@
 
   @media print {
     html { scroll-behavior: auto; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .slide { min-height: 100vh; page-break-after: always; break-after: page; }
-    body { background: #fff; }
+    body { background: var(--bg); }
   }
 </style>
 </head>
