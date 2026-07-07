@@ -1,7 +1,7 @@
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
-from src.config import VECTOR_DIR, RAG_TOP_K
+from src.config import RAG_TOP_K
 from src.llm.client import get_chat_model
 from src.rag.index import get_vectorstore
 
@@ -16,7 +16,7 @@ def answer(question, app_name=None):
     search_kwargs = {"k": RAG_TOP_K}
     if app_name:
         search_kwargs["filter"] = {"app_name": app_name}
-    retriever = get_vectorstore(VECTOR_DIR).as_retriever(search_kwargs=search_kwargs)
+    retriever = get_vectorstore().as_retriever(search_kwargs=search_kwargs)
     docs = retriever.invoke(question)
     contexts = [d.page_content for d in docs]
 
