@@ -1,9 +1,19 @@
+import os
+
 import streamlit as st
 from dotenv import load_dotenv
-from src.config import MODEL_DIR, HUB_MODEL_ID
-from src.rag.index import get_game_counts as _get_game_counts, get_reviews_by_app
 
 load_dotenv()
+try:
+    # Streamlit Cloud는 .env가 없고 st.secrets로 환경변수를 주입한다 —
+    # src.config가 os.environ에서 읽으므로 여기서 연결해준다 (로컬은 secrets.toml 없어 예외 무시).
+    for _key, _value in st.secrets.items():
+        os.environ.setdefault(_key, str(_value))
+except Exception:
+    pass
+
+from src.config import MODEL_DIR, HUB_MODEL_ID
+from src.rag.index import get_game_counts as _get_game_counts, get_reviews_by_app
 
 MIN_GAME_REVIEWS = 20  # 게임 분석 탭에 노출할 최소 리뷰 수
 
