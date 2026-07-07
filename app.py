@@ -1,6 +1,7 @@
 import streamlit as st
 from dotenv import load_dotenv
-from src.config import MODEL_DIR, VECTOR_DIR, HUB_MODEL_ID
+from src.config import MODEL_DIR, HUB_MODEL_ID
+from src.rag.index import get_game_counts as _get_game_counts, get_reviews_by_app
 
 load_dotenv()
 
@@ -14,21 +15,10 @@ def get_classifier():
     # 배포 환경(모델 미포함 레포)에서는 HF Hub에서 다운로드
     return SentimentClassifier(local if local.exists() else HUB_MODEL_ID)
 
-@st.cache_resource
-def get_collection():
-    """메타데이터·문서 조회 전용 — 임베딩 모델 없이 Chroma만 연다.
-    (임베딩 모델은 Q&A에서 실제 검색할 때만 로드해 배포 메모리를 아낀다)"""
-    import chromadb
-    return chromadb.PersistentClient(path=str(VECTOR_DIR)).get_collection("reviews")
-
 @st.cache_data
 def get_game_counts():
-    """색인 메타데이터에서 게임별 리뷰 수 집계 (리뷰 많은 순)."""
-    from collections import Counter
-    got = get_collection().get(include=["metadatas"])
-    counts = Counter(m["app_name"] for m in got["metadatas"]
-                     if m and m.get("app_name") and m["app_name"] != "(unknown)")
-    return [(name, n) for name, n in counts.most_common() if n >= MIN_GAME_REVIEWS]
+    """색인에서 게임별 리뷰 수 집계 (리뷰 많은 순), SQL GROUP BY로 직접 집계."""
+    return _get_game_counts(min_count=MIN_GAME_REVIEWS)
 
 @st.cache_data(show_spinner="리뷰 분류 중...")
 def classify_reviews(reviews: tuple):
@@ -120,7 +110,7 @@ with st.sidebar:
                             "모델 정보", "RAG 구조"],
                     label_visibility="collapsed")
     st.divider()
-    st.caption("DistilBERT 분류 · Qwen2.5 요약 · Chroma RAG")
+    st.caption("DistilBERT 분류 · Qwen2.5 요약 · Supabase pgvector RAG")
 
 if page == "게임 분석":
     page_header("GAME ANALYSIS",
@@ -152,9 +142,7 @@ if page == "게임 분석":
         choice = st.selectbox("게임 선택", labels)
         if st.button("이 게임 분석", key="game_analyze"):
             game_name = games[labels.index(choice)][0]
-            got = get_collection().get(where={"app_name": game_name},
-                                       include=["documents"])
-            reviews = got["documents"]
+            reviews = get_reviews_by_app(game_name)
             st.caption(f"'{game_name}' 리뷰 {len(reviews)}건을 분석합니다.")
             pos, neg = analyze_and_summarize(reviews)
             with st.expander("분석에 사용된 리뷰"):
@@ -212,7 +200,7 @@ elif page == "모델 정보":
 | 모델 | `all-MiniLM-L6-v2` (사전학습 그대로) |
 | 파라미터 수 | 약 22M |
 | 출력 | 문장 → 384차원 벡터 |
-| 색인 | 리뷰 10,810건 → Chroma (`app_name`·`label` 메타데이터) |
+| 색인 | 리뷰 80만 건 → Supabase pgvector (`app_name`·`label` 메타데이터) |
 | 검색 | 코사인 유사도 top-5 + 게임 필터 |
 """)
         st.caption("역할: 질문과 의미가 비슷한 리뷰를 찾는다 (Q&A 검색).")
@@ -256,9 +244,9 @@ elif page == "RAG 구조":
     st.markdown(f'<div class="kicker">STEP 1 · 색인 구축 — 한 번만 (노트북 06)</div>',
                 unsafe_allow_html=True)
     st.markdown(flow([
-        ("리뷰 10,810건", "train 전체 + 인기 20개 게임", False),
+        ("리뷰 80만 건", "긍정 40만 + 부정 40만 균형 샘플", False),
         ("임베딩 모델", "MiniLM · 문장→384차원 벡터", True),
-        ("Chroma 저장", "벡터 + 원문 + 게임명·라벨", True),
+        ("Supabase 저장", "pgvector + 원문 + 게임명·라벨", True),
     ]), unsafe_allow_html=True)
 
     st.markdown(f'<div class="kicker">STEP 2 · 질의응답 — 질문할 때마다 (리뷰 Q&A 메뉴)</div>',
