@@ -32,30 +32,30 @@ streamlit run app.py                     # 앱 실행
 3. `03_train_lstm.ipynb` — LSTM 베이스라인 학습(early stopping) + TF-IDF+LogReg 고전 ML 베이스라인 → `models/lstm/`, `models/tfidf_logreg/metrics.json`
 4. `04_train_distilbert.ipynb` — `distilbert-base-uncased` 파인튜닝 → `models/distilbert/`(모델+토크나이저+`metrics.json`)
 5. `05_compare_models.ipynb` — 세 모델(TF-IDF+LogReg/LSTM/DistilBERT) `metrics.json`을 읽어 비교표 생성 → `models/comparison.md`
-6. `06_build_index.ipynb` — 혼합 샘플링 색인: train 전체 + 인기 상위 20개 게임 리뷰(원본에서 라벨당 200건씩 추가 정제) → `chroma_store/`에 `app_name`/`label` 메타데이터와 함께 색인 (재구축 시 컬렉션 재생성, git 100MB 제한 용량 체크 포함)
+6. `06_build_index.ipynb` — 균형 샘플링(긍/부정 각 N건, 체크포인트 기반 배치 적재) → Supabase pgvector(`langchain_pg_embedding`)에 `app_name`/`label` 메타데이터와 함께 색인, HNSW 인덱스 생성 포함
 7. `07_model_analysis.ipynb` — DistilBERT 대상 ROC/PR, 확신도 분포, 오분류 사례, gradient saliency, attention 히트맵 (04 완료 필요)
 
-`app.py`는 `models/distilbert/`(4번 산출물)와 `chroma_store/`(6번 산출물)에 의존한다.
+`app.py`는 `models/distilbert/`(4번 산출물)와 Supabase pgvector 색인(6번 산출물, `DATABASE_URL` 환경변수로 연결)에 의존한다.
 
 ## Architecture
 
-5개 컴포넌트가 파일시스템(`data/`, `models/`, `chroma_store/`)을 매개로 느슨하게 연결된 파이프라인이다. 코드는 실행 로직(노트북)과 재사용 로직(`src/`)으로 분리되어 있고, 노트북은 `src/`를 import해서 쓴다.
+5개 컴포넌트가 파일시스템(`data/`, `models/`)과 Supabase(pgvector)를 매개로 느슨하게 연결된 파이프라인이다. 코드는 실행 로직(노트북)과 재사용 로직(`src/`)으로 분리되어 있고, 노트북은 `src/`를 import해서 쓴다.
 
 ```
-src/config.py         전역 상수(경로, 모델 ID, RANDOM_SEED, LABELS) — 다른 모든 모듈이 여기서 경로를 가져옴
+src/config.py         전역 상수(경로, 모델 ID, RANDOM_SEED, LABELS, DATABASE_URL/DATABASE_URL_DIRECT) — 다른 모든 모듈이 여기서 가져옴
 src/data/pipeline.py  텍스트 정제(normalize_text) + 정제·라벨변환(clean_reviews) + 계층분할(split_data)
 src/models/dataset.py LSTM용 어휘 구축(build_vocab)·인코딩(encode) — 공백 토크나이저, PAD=0/UNK=1
 src/models/lstm.py    LSTMClassifier (nn.Module)
 src/models/infer.py   SentimentClassifier — HF AutoModel 기반 추론 래퍼, app.py가 사용하는 것은 이 클래스
 src/llm/client.py     get_chat_model()/chat() — LangChain 챗 모델. LLM_BACKEND로 HF(기본, with_fallbacks 폴백)/Ollama 전환
 src/llm/summarize.py  ChatPromptTemplate | LLM | StrOutputParser 체인으로 총평+장단점 요약
-src/rag/index.py      LangChain Chroma 벡터스토어(HuggingFaceEmbeddings) 구축/조회 — get_collection은 호환 별칭
+src/rag/index.py      LangChain PGVector(Supabase, HuggingFaceEmbeddings) 구축/조회 — get_game_counts/get_reviews_by_app는 raw SQL
 src/rag/qa.py         retriever(게임 필터) → 프롬프트 체인 → 근거 기반 답변
 ```
 
-`app.py`는 Streamlit 3탭 구조: 탭1 게임 분석(Chroma 메타데이터에서 게임 목록 → 해당 게임 리뷰 분류+요약), 탭2 리뷰 직접 입력(`SentimentClassifier` + `summarize`), 탭3 RAG Q&A(`src.rag.qa.answer`, 게임 필터 지원, RAG 모듈은 지연 import). 게임별 기능은 06 색인의 `app_name`/`label` 메타데이터에 의존하며, `clean_reviews(extra_cols=["app_name"])`로 02에서 컬럼이 유지되어야 한다.
+`app.py`는 Streamlit 3탭 구조: 탭1 게임 분석(pgvector 메타데이터에서 게임 목록 → 해당 게임 리뷰 분류+요약), 탭2 리뷰 직접 입력(`SentimentClassifier` + `summarize`), 탭3 RAG Q&A(`src.rag.qa.answer`, 게임 필터 지원, RAG 모듈은 지연 import). 게임별 기능은 06 색인의 `app_name`/`label` 메타데이터에 의존하며, `clean_reviews(extra_cols=["app_name"])`로 02에서 컬럼이 유지되어야 한다.
 
-LLM·RAG는 **LangChain** 기반이다: 임베딩·벡터스토어(langchain-chroma + langchain-huggingface), 프롬프트/체인(LCEL `prompt | llm | parser`), 폴백(`with_fallbacks`). `LLM_BACKEND` 환경변수 하나로 HF Inference API(배포)↔Ollama(로컬) 전환.
+LLM·RAG는 **LangChain** 기반이다: 임베딩·벡터스토어(langchain-postgres + langchain-huggingface), 프롬프트/체인(LCEL `prompt | llm | parser`), 폴백(`with_fallbacks`). `LLM_BACKEND` 환경변수 하나로 HF Inference API(배포)↔Ollama(로컬) 전환. 벡터스토어는 `DATABASE_URL`(런타임 pooler)/`DATABASE_URL_DIRECT`(노트북 대량 적재·DDL)로 Supabase Postgres에 연결한다.
 
 라벨 규약: Steam `review_score`는 1(추천)/-1(비추천)이며 `clean_reviews`에서 1(긍정)/0(부정)으로 변환된다. `src.config.LABELS`가 이 매핑을 표시용으로 다시 정의한다(`{0: "부정", 1: "긍정"}`).
 

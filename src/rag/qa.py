@@ -1,11 +1,12 @@
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
-from src.config import VECTOR_DIR, RAG_TOP_K
+from src.config import RAG_TOP_K
 from src.llm.client import get_chat_model
 from src.rag.index import get_vectorstore
 
 _PROMPT = ChatPromptTemplate.from_template(
+    "언어는 한국어만 사용한다."
     "아래 게임 리뷰들만 근거로 질문에 한국어로 답하라. "
     "근거가 없으면 모른다고 답하라.\n\n"
     "[리뷰]\n{context}\n\n[질문] {question}\n[답변]")
@@ -16,7 +17,7 @@ def answer(question, app_name=None):
     search_kwargs = {"k": RAG_TOP_K}
     if app_name:
         search_kwargs["filter"] = {"app_name": app_name}
-    retriever = get_vectorstore(VECTOR_DIR).as_retriever(search_kwargs=search_kwargs)
+    retriever = get_vectorstore().as_retriever(search_kwargs=search_kwargs)
     docs = retriever.invoke(question)
     contexts = [d.page_content for d in docs]
 
