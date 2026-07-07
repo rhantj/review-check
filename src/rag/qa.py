@@ -6,6 +6,7 @@ from src.llm.client import get_chat_model
 from src.rag.index import get_vectorstore
 
 _PROMPT = ChatPromptTemplate.from_template(
+    "언어는 한국어만 사용한다."
     "아래 게임 리뷰들만 근거로 질문에 한국어로 답하라. "
     "근거가 없으면 모른다고 답하라.\n\n"
     "[리뷰]\n{context}\n\n[질문] {question}\n[답변]")

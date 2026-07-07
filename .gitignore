@@ -19,8 +19,7 @@ data/raw/
 /models/
 faiss_index/
 output/*.png
-# 배포(Streamlit Cloud 등)에서 RAG 색인이 필요해 chroma_store는 레포에 포함
-!chroma_store/**
+chroma_store/
 .claude
 .pytest_cache
 

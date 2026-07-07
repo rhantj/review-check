@@ -200,7 +200,7 @@ elif page == "모델 정보":
 | 모델 | `all-MiniLM-L6-v2` (사전학습 그대로) |
 | 파라미터 수 | 약 22M |
 | 출력 | 문장 → 384차원 벡터 |
-| 색인 | 리뷰 80만 건 → Supabase pgvector (`app_name`·`label` 메타데이터) |
+| 색인 | 리뷰 약 10만 건 → Supabase pgvector (`app_name`·`label` 메타데이터) |
 | 검색 | 코사인 유사도 top-5 + 게임 필터 |
 """)
         st.caption("역할: 질문과 의미가 비슷한 리뷰를 찾는다 (Q&A 검색).")
@@ -244,7 +244,7 @@ elif page == "RAG 구조":
     st.markdown(f'<div class="kicker">STEP 1 · 색인 구축 — 한 번만 (노트북 06)</div>',
                 unsafe_allow_html=True)
     st.markdown(flow([
-        ("리뷰 80만 건", "긍정 40만 + 부정 40만 균형 샘플", False),
+        ("리뷰 약 10만 건", "긍정·부정 균형 샘플", False),
         ("임베딩 모델", "MiniLM · 문장→384차원 벡터", True),
         ("Supabase 저장", "pgvector + 원문 + 게임명·라벨", True),
     ]), unsafe_allow_html=True)
