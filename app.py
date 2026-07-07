@@ -223,7 +223,7 @@ elif page == "모델 정보":
 |---|---|
 | 모델 | `Qwen/Qwen2.5-7B-Instruct` (HF Inference API) |
 | 파라미터 수 | 약 7.6B |
-| 폴백 | `Llama-3.3-70B-Instruct` (1차 실패 시 자동 전환) |
+| 폴백 | `Qwen/Qwen2.5-72B-Instruct` (1차 실패 시 자동 전환) |
 | 호출 | LangChain 체인 (`prompt \\| llm \\| parser`) · max 512토큰 |
 | 출력 | 총평 + 장점 3 + 단점 3 / 근거 기반 Q&A 답변 |
 """)
