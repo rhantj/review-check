@@ -5,6 +5,7 @@ from langchain_postgres import PGVector
 from src.config import DATABASE_URL, EMBED_MODEL_ID
 
 COLLECTION_NAME = "reviews"
+EMBEDDING_DIM = 384  # all-MiniLM-L6-v2 출력 차원 — HNSW 인덱스는 고정 차원 컬럼이 필요
 _embeddings = None
 
 
@@ -29,6 +30,7 @@ def get_vectorstore(connection=None):
         embeddings=get_embeddings(),
         collection_name=COLLECTION_NAME,
         connection=_pg_connection_string(connection or DATABASE_URL),
+        embedding_length=EMBEDDING_DIM,
         use_jsonb=True,
     )
 
@@ -39,6 +41,7 @@ def reset_index(connection):
         embeddings=get_embeddings(),
         collection_name=COLLECTION_NAME,
         connection=_pg_connection_string(connection),
+        embedding_length=EMBEDDING_DIM,
         use_jsonb=True,
         pre_delete_collection=True,
     )
@@ -50,6 +53,7 @@ def add_batch(texts, metadatas, connection):
         embeddings=get_embeddings(),
         collection_name=COLLECTION_NAME,
         connection=_pg_connection_string(connection),
+        embedding_length=EMBEDDING_DIM,
         use_jsonb=True,
     )
     vs.add_texts(texts, metadatas=metadatas)
